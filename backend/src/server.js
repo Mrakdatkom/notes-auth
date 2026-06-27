@@ -2,6 +2,7 @@ import express from 'express';
 import notesRoutes from "./routes/notesRoutes.js";
 import { connectDb } from './config/db.js';
 import dotenv from "dotenv";
+import rateLimiter from './middleware/rateLimiter.js';
 
 dotenv.config();
 
@@ -19,8 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(rateLimiter);
+
 app.use("/api/notes", notesRoutes);
 
-app.listen(PORT, () => {
-  console.log("DB Connected:", PORT);
+// Connect to database first before rendering the page
+connectDb().then(() => {
+  app.listen(PORT, () => {
+    console.log("DB Connected:", PORT);
+  });
 });

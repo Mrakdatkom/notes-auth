@@ -3,13 +3,16 @@ import notesRoutes from "./routes/notesRoutes.js";
 import { connectDb } from './config/db.js';
 import dotenv from "dotenv";
 import rateLimiter from './middleware/rateLimiter.js';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-connectDb();
+app.use(cors({
+  origin: "http://localhost:5175"
+}));
 
 // parse data into json
 app.use(express.json());

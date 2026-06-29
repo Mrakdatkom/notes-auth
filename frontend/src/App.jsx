@@ -9,7 +9,6 @@ import { Button } from './components/ui/button'
 const App = () => {
   return (
     <div>
-      <Button onClick={() => toast.success("Successfully created!")}>Click here</Button>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/create" element={<CreateNotePage />} />

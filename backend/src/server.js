@@ -4,6 +4,9 @@ import { connectDb } from './config/db.js';
 import dotenv from "dotenv";
 import rateLimiter from './middleware/rateLimiter.js';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import authMiddleware from './middleware/authMiddleware.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -25,7 +28,10 @@ app.use((req, res, next) => {
 
 app.use(rateLimiter);
 
-app.use("/api/notes", notesRoutes);
+app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/notes", authMiddleware, notesRoutes);
 
 // Connect to database first before rendering the page
 connectDb().then(() => {

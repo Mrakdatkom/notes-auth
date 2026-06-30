@@ -8,11 +8,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import FileUpload from '@/components/FileUpload';
 
 const NoteDetailPage = () => {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -33,6 +35,10 @@ const NoteDetailPage = () => {
 
     fetchNote();
   }, [id]); // This page will render everytime there's id note
+
+  // const handleImageUpload = (url) => {
+  //   setNote((prev) => ({ ...prev, image: url}));
+  // }
 
   if (loading) {
     return (
@@ -56,16 +62,20 @@ const NoteDetailPage = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!note.title.trim() || !note.content.trim()) {
-      toast.error("Title and content are required.");
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('title', note.title);
+    formData.append('content', note.content);
+    if (file) {
+      formData.append("image", file);
     }
 
     setSaving(true);
 
     try {
-      await api.put(`/notes/${id}`, note);
+      await api.put(`/notes/${id}`, formData);
       toast.success("Note updated successfully.");
       navigate(`/`);
     } catch (error) {
@@ -97,42 +107,54 @@ const NoteDetailPage = () => {
           <CardHeader>
             <CardTitle className="text-3xl text-center">Edit Note</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Title */}
-            <div className="space-y-2">
-              <Field>
-                <FieldLabel htmlFor="input-field-title">Title</FieldLabel>
-                <Input
-                  id="input-field-title"
-                  type="text"
-                  placeholder="Note title"
-                  value={note.title}
-                  onChange={(e) => setNote({ ...note, title: e.target.value })}
-                />
-              </Field>
-            </div>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              {/* Image upload */}
+              <div>
+                <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+                {loading ? (
+                  <LoaderCircle className="animate-spin mt-2 text-primary" size={24} />
+                ) : (
+                  note.image && <img src={note.image} alt="Note attachment" className="max-w-xs mt-2" />
+                )}
+              </div>
 
-            {/* Content */}
-            <div className="space-y-2">
-              <Field>
-                <FieldLabel htmlFor="textarea-message">Content</FieldLabel>
-                <Textarea
-                  id="textarea-message"
-                  placeholder="What is your note all about?"
-                  value={note.content}
-                  onChange={(e) => setNote({ ...note, content: e.target.value })}
-                  className="min-h-37.5"
-                />
-              </Field>
-            </div>
-          </CardContent>
+              {/* Title */}
+              <div className="space-y-2">
+                <Field>
+                  <FieldLabel htmlFor="input-field-title">Title</FieldLabel>
+                  <Input
+                    id="input-field-title"
+                    type="text"
+                    placeholder="Note title"
+                    value={note.title}
+                    onChange={(e) => setNote({ ...note, title: e.target.value })}
+                  />
+                </Field>
+              </div>
 
-          <CardFooter className="flex justify-end">
-            <Button disabled={saving} onClick={handleSave}>
-              {saving && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-          </CardFooter>
+              {/* Content */}
+              <div className="space-y-2">
+                <Field>
+                  <FieldLabel htmlFor="textarea-message">Content</FieldLabel>
+                  <Textarea
+                    id="textarea-message"
+                    placeholder="What is your note all about?"
+                    value={note.content}
+                    onChange={(e) => setNote({ ...note, content: e.target.value })}
+                    className="min-h-37.5"
+                  />
+                </Field>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex justify-end">
+              <Button disabled={saving} type="submit">
+                {saving && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
       </div>
     </div >

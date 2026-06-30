@@ -9,10 +9,11 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router';
 
-const CreateNotePage = () => {
+const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -24,15 +25,25 @@ const CreateNotePage = () => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    if (file) {
+      formData.append('image', file);
+    }
+
     setLoading(true);
     try {
-      await api.post(`/notes`, { title, content });
+      await api.post("/notes", formData);
       toast.success("Note created successfully.");
 
       // Clear the fields after successfull creation
       setTitle("");
       setContent("");
+      setFile(null);
+
       setLoading(false);
+      // if (onUpload) onUpload(res.data.image);  // tell the parent the new URL
       navigate("/");
     } catch (error) {
       toast.error("Failed to create note, please try again.");
@@ -67,6 +78,8 @@ const CreateNotePage = () => {
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+
               {/* Title */}
               <div className="space-y-2">
                 <Field>
@@ -108,4 +121,4 @@ const CreateNotePage = () => {
   )
 }
 
-export default CreateNotePage
+export default CreatePage

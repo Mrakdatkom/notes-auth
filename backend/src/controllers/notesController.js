@@ -2,7 +2,9 @@ import Note from "../models/Note.js";
 
 export async function getAllNotes(req, res) {
   try {
-    const notes = await Note.find({ ...req.ownerFilter }).sort({ created_at: -1 });
+    const notes = await Note.find({ ...req.ownerFilter })
+    .populate('userId', 'email') // Get the email column value from user table using Note's FK userId
+    .sort({ created_at: -1 });
     res.status(200).json(notes);
   } catch (error) {
     console.error("Error occured while fetching notes", error);

@@ -37,6 +37,7 @@ const NoteCard = ({ note, setNotes }) => {
         </CardHeader>
         <CardContent>
           <p>{note.content}</p>
+          <p>{note.userId?.email ?? "Unknown user."}</p>
           <span className='text-sm text-base-content/60'>{formatDate(new Date(note.createdAt))}</span>
         </CardContent>
         <CardFooter>

@@ -65,3 +65,8 @@ export async function getMe(req, res) {
   const user = await User.findById(req.userId).select("-password");
   res.json({ user });
 }
+
+export async function logout(req, res) {
+  res.cookie("token", "", { maxAge: 0 }); // Clear the cookie
+  res.json({ message: "Logged out" });
+}

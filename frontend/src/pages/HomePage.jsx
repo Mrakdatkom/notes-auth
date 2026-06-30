@@ -5,6 +5,7 @@ import { LoaderCircle } from 'lucide-react';
 import NoteCard from '../components/NoteCard';
 import api from '@/lib/axios';
 import RateLimiterUI from '@/components/RateLimiterUI';
+import NoteNotFoundUI from '@/components/NoteNotFoundUI';
 
 const HomePage = () => {
   const [rateLimited, setRateLimited] = useState(false);
@@ -48,10 +49,12 @@ const HomePage = () => {
           </div>
         }
 
+        {notes.length === 0 && !loading && !rateLimited && <NoteNotFoundUI />}
+
         {notes.length > 0 && !rateLimited && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
             {notes.map((note) => (
-              <NoteCard key={note._id} note={note} />
+              <NoteCard key={note._id} note={note} setNotes={setNotes} />
             ))}
           </div>
         )}

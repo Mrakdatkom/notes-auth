@@ -8,6 +8,11 @@ const noteSchema = new mongoose.Schema(
     },
     content: {
       type: String,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     }
   },
   {

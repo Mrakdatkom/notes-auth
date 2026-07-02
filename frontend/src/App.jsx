@@ -8,6 +8,7 @@ import { Button } from './components/ui/button'
 import RegisterPage from './pages/auth/RegisterPage'
 import LoginPage from './pages/auth/LoginPage'
 import { useAuth } from './context/AuthContext'
+import ProfilePage from './pages/auth/ProfilePage'
 
 // A wrapper that redirects to /login page if the user is not authenticated
 const ProtectedRoute = ({ children }) => {
@@ -26,6 +27,7 @@ const App = () => {
 
         {/* Authenticated Routes */}
         <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+        <Route path="/me" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/create" element={<ProtectedRoute><CreateNotePage /></ProtectedRoute>} />
         <Route path="/notes/:id" element={<ProtectedRoute><NoteDetailPage /></ProtectedRoute>} />
       </Routes>

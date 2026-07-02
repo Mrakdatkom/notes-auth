@@ -53,6 +53,7 @@ export async function login(req, res) {
       maxAge: 1000 * 60 * 60,
     });
 
+    // 5. Send response
     res.json({ message: "Logged in successfully", userId: user._id });
   } catch (error) {
     console.error("Login error", error);

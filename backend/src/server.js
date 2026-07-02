@@ -7,32 +7,44 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authMiddleware from './middleware/authMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
+import helmet from 'helmet';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// 1st. helmet()
+app.use(helmet());
+
+// 2nd. cors()
 app.use(cors({
   origin: "http://localhost:5174",
   credentials: true,
 }));
 
-// parse data into json
+// 3rd. parse data into json
 app.use(express.json());
 
-// Middleware
+// 4th. parse cookies
+app.use(cookieParser());
+
+// Logging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
+// Route limit
 app.use(rateLimiter);
 
-app.use(cookieParser());
+// 6th. routes
+app.use('/api/auth', authRoutes);
+app.use('/api/notes', notesRoutes);
 
-app.use("/api/auth", authRoutes);
-app.use("/api/notes", authMiddleware, notesRoutes);
+// 7th. protect()
+
+// 8th. errorMiddleware()
 
 // Connect to database first before rendering the page
 connectDb().then(() => {

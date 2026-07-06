@@ -1,15 +1,16 @@
 import { getCloudinary } from "../config/cloudinary.js";
 import Note from "../models/Note.js";
 
-export async function getAllNotes(req, res) {
+export async function getAllNotes(req, res, next) {
   try {
     const notes = await Note.find({ ...req.ownerFilter })
       .populate('userId', 'email') // Get the email column value from user table using Note's FK userId
       .sort({ created_at: -1 });
     res.status(200).json(notes);
   } catch (error) {
-    console.error("Error occured while fetching notes", error);
-    res.status(500).json({ message: "Internal server error." });
+    // console.error("Error occured while fetching notes", error);
+    // res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 }
 

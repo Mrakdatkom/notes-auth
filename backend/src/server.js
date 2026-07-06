@@ -5,9 +5,9 @@ import dotenv from "dotenv";
 import rateLimiter from './middleware/rateLimiter.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authMiddleware from './middleware/authMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import helmet from 'helmet';
+import errorMiddleware from './middleware/errorMiddleware.js';
 
 dotenv.config();
 
@@ -44,7 +44,8 @@ app.use('/api/notes', notesRoutes);
 
 // 7th. protect()
 
-// 8th. errorMiddleware()
+// 8th. errorMiddleware
+app.use(errorMiddleware);
 
 // Connect to database first before rendering the page
 connectDb().then(() => {

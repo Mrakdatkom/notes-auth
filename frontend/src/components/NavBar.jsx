@@ -14,7 +14,7 @@ const Navbar = () => {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <Link to="/create" as="button" className="text-white">Add Note</Link>
+            <Link to="/create" as="button" className="text-primary">Add Note</Link>
             <span className="text-sm">{user.email}</span>
             <Button onClick={logout} variant='ghost'>
               <LogOutIcon className="w-4 h-4 mr-1" /> Logout

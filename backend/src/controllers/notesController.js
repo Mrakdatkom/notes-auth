@@ -1,60 +1,33 @@
-import { getCloudinary } from "../config/cloudinary.js";
 import Note from "../models/Note.js";
 
 export async function getAllNotes(req, res, next) {
   try {
     const notes = await Note.find({ ...req.ownerFilter })
       .populate('userId', 'email') // Get the email column value from user table using Note's FK userId
-      .sort({ created_at: -1 });
+      .sort({ createdAt: -1 });
     res.status(200).json(notes);
   } catch (error) {
-    // console.error("Error occured while fetching notes", error);
-    // res.status(500).json({ message: "Internal server error." });
     next(error);
   }
 }
 
-export async function createNote(req, res) {
+export async function createNote(req, res, next) {
   try {
     const { title, content } = req.body;
-    // const note = new Note({ title, content, ...req.ownerFilter });
 
-    // Basic validation
-    if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required." });
-    }
+    const userId = req.ownerFilter.userId;
 
     // Create note object with no image first
-    const note = new Note({
-      title,
-      content,
-      ...req.ownerFilter, // foreign key
-    });
-
-    // Check if there's file uploaded, if true, send to cloudinary
-    if (req.file) {
-      const b64 = Buffer.from(req.file.buffer).toString('base64');
-      const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-
-      const cloudinary = getCloudinary();
-      const result = await cloudinary.uploader.upload(dataURI, {
-        folder: 'notes',
-        // Use a unique ID that doesn't depend on note._id
-        public_id: `note_${Date.now()}_${Math.round(Math.random() * 1e9)}`,
-      });
-
-      note.image = result.secure_url;
-    }
+    const note = await Note.createNewNote(title, content, userId, req.file);
 
     const newNote = await note.save();
-    res.status(201).json(newNote);
+    res.status(201).json({ message: "Note created successfully", newNote });
   } catch (error) {
-    console.error("An error occured while creating note.", error);
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 }
 
-export async function getNoteById(req, res) {
+export async function getNoteById(req, res, next) {
   try {
     const note = await Note.findOne({ _id: req.params.id, ...req.ownerFilter }); // Fetch single note from authenticated user
     if (!note) {
@@ -62,52 +35,40 @@ export async function getNoteById(req, res) {
     }
     res.status(200).json(note);
   } catch (error) {
-    console.error("An error occured while fetching note.");
-    res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 }
 
-export async function updateNote(req, res) {
+export async function updateNote(req, res, next) {
   try {
     const { title, content } = req.body;
+    const id = req.params.id;
+    const userId = req.ownerFilter.userId;
 
-    if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required." });
+    const note = await Note.findOne({ _id: id, userId });
+
+    if (!note) {
+      return res.status(404).json({ message: "Note not found." });
     }
 
-    // Find the note to update
-    const note = await Note.findOne({ _id: req.params.id, ...req.ownerFilter });
-    if (!note) return res.status(404).json({ message: 'Note not found' });
+    const updatedNote = await note.updateNote(title, content, req.file);
 
-    // Update fileds
-    note.title = title;
-    note.content = content;
-
-    // If a new image is uploaded, upload and replace
-    if (req.file) {
-      const b64 = Buffer.from(req.file.buffer).toString('base64');
-      const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-
-      const cloudinary = getCloudinary();
-      const result = await cloudinary.uploader.upload(dataURI, {
-        folder: 'notes',
-        public_id: `note_${Date.now()}_${Math.round(Math.random() * 1e9)}`,
-      });
-
-      note.image = result.secure_url;
-    }
-
-    // Save everything
-    await note.save();
-
-    res.status(200).json({ message: 'Note updated successfully.', note });
+    res.status(200).json({
+      message: 'Note updated successfully.',
+      note: {
+        id: updatedNote._id,
+        title: updatedNote.title,
+        content: updatedNote.content,
+        image: updatedNote.image,
+        createdAt: updatedNote.createdAt,
+      }
+    });
   } catch (error) {
-    console.error("An error occured while updating note.");
-    res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 }
 
-export async function deleteNote(req, res) {
+export async function deleteNote(req, res, next) {
   try {
     const deleteNote = await Note.findOneAndDelete({ _id: req.params.id, ...req.ownerFilter });
 
@@ -115,7 +76,6 @@ export async function deleteNote(req, res) {
 
     res.status(200).json({ message: "Note deleted successfully" });
   } catch (error) {
-    console.error("An error occured while deleting note", error);
-    res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 }

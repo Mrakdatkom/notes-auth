@@ -32,10 +32,10 @@ export async function login(req, res, next) {
 
     // 4. Send token as an httpOnly cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60,
+      httpOnly: true, // This will hide the cookie from the Javascript when execute, good against XSS attacks, but it can still be accessed by the server.
+      secure: process.env.NODE_ENV === "production", // Only send the cookie in production mode (HTTPS), this make sure the cookie is only accessible by the sender and receiver even though people can see it but cannot see what's inside it.
+      sameSite: "lax", // Anti-CSRF attack
+      maxAge: 1000 * 60 * 60, // logs out automatically regardless of they are active or not after 1hour
     });
 
     const userData = user.getPublicProfile();

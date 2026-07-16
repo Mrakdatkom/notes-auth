@@ -54,7 +54,7 @@ export async function login(req, res, next) {
 export async function getMe(req, res, next) {
   try {
     // authMiddleware will put userId on the req
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

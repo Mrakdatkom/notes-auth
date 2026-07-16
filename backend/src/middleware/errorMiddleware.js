@@ -1,23 +1,40 @@
-// middleware/errorMiddleware.js
+// errorMiddleware.js — centralized JWT error handling (corrected version)
+export default function errorMiddleware(err, req, res, next) {
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Internal server error';
 
-const errorMiddleware = (err, req, res, next) => {
-  // Log the error so you can see it in the console
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
+  // Handle JWT errors that weren't caught in protect 
+  if (err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    message = 'Invalid token';
+  }
 
-  // Get the status code (use 500 if none was set)
-  const statusCode = err.statusCode || 500;
+  // Handle JWT expiration errors
+  if (err.name === 'TokenExpiredError') {
+    statusCode = 401;
+    message = 'Session expired. Please log in again.';
+  }
 
-  // Get the error message (use generic message if none)
-  const message = err.message || 'Something went wrong on the server';
+  // Handle Mongoose CastError (bad ObjectId format) 
+  if (err.name === 'CastError') {
+    statusCode = 400; message = 'Invalid ID format';
+  }
 
-  // Send response to the client
+  // Handle Mongoose duplicate key (unique index violated) 
+  if (err.code === 11000) {
+    statusCode = 409;
+    message = `${Object.keys(err.keyValue)[0]} already exists`;
+  }
+
+  // Handle mangled JWT payloads that fail JSON parsing before signature check
+  if (err.name === 'SyntaxError' && err.message.includes('JSON')) {
+    statusCode = 401;
+    message = 'Invalid token';
+  }
+
   res.status(statusCode).json({
     success: false,
-    message: message,
-    // Only show error details in development (not in production)
-    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }) // Only include stack trace in development 
   });
 };
-
-export default errorMiddleware;

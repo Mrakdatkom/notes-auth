@@ -21,6 +21,24 @@ export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
 
+    // Server-level validation before the authentication check
+    // Check if the user input is string and not empty
+    if (typeof email !== 'string' || email.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Email must be a valid string'
+      });
+    }
+
+    // Server-level validation before the authentication check
+    // Check if the user input is string and not empty
+    if (typeof password !== 'string' || password.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be a valid string'
+      });
+    }
+
     const user = await User.login(email, password);
 
     // 3. Create a JWT token

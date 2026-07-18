@@ -54,6 +54,12 @@ userSchema.statics.findByEmail = async function (email) {
 }
 
 userSchema.statics.login = async function (email, password) {
+  // Server-level validation before the authentication check
+  // Check if the user input is string
+  if (typeof email !== 'string') {
+    throw new Error('Email must be a string');
+  }
+
   const user = await this.findOne({ email: email.toLowerCase() }).select('+password');
 
   if (!user || !(await user.matchPassword(password))) {

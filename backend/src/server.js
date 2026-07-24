@@ -2,7 +2,7 @@ import express from 'express';
 import notesRoutes from "./routes/notesRoutes.js";
 import { connectDb } from './config/db.js';
 import dotenv from "dotenv";
-import rateLimiter from './middleware/rateLimiter.js';
+import { apiLimiter, authLimiter } from './middleware/rateLimiter.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
@@ -19,7 +19,7 @@ app.use(helmet());
 
 // 2. CORS. Cors is the one resposible for checking the header's origin and credentials. If the origin is in the allowed list, allow the request. Otherwise, block.
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: 'http://localhost:5173',
   credentials: true,
 }));
 
@@ -30,11 +30,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 // 5. Rate Limiter
-app.use(rateLimiter);
+app.use('/api', apiLimiter);
 
 // 6. Routes. Will trust the app that the incoming requests are safe and already configured so it is declared at the bottom part.
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/notes", notesRoutes);
-app.use("/api/auth", authRoutes);
 
 // 7. errorMiddleware. The last thing to setup. Catches all the possible errors that might occur somewhere in the app.
 app.use(errorMiddleware);

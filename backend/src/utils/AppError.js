@@ -1,15 +1,19 @@
-// utils/AppError.js
+// backend/src/utils/AppError.js
 class AppError extends Error {
   constructor(message, statusCode) {
-    super(message); // Sets the native error message
+    // 1. Call the parent constructor with the message
+    super(message);
 
+    // 2. Set the status code and mark the error as operational
     this.statusCode = statusCode;
-    // Categorize status as 'fail' for 4xx errors or 'error' for 5xx errors
+
+    // 3. Differentiate between operational errors (expected, 4xx, fail) and programmer errors (unexpected, 5xx, error)
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
-    // Marks the error as operational so you can safely send details to the client
+
+    // 4. Mark error as operational (expected) so we can safely send the message to the client
     this.isOperational = true;
 
-    // Captures the stack trace, keeping the constructor call clean
+    // 5. Capture the stack trace to keep the constructor clean
     Error.captureStackTrace(this, this.constructor);
   }
 }

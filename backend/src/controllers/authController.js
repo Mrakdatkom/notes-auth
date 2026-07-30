@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { config } from "../config/index.js";
 
 export async function register(req, res, next) {
   try {
@@ -44,14 +45,14 @@ export async function login(req, res, next) {
     // 3. Create a JWT token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET,
+      config.jwtSecret,
       { expiresIn: "1h" }
     );
 
     // 4. Send token as an httpOnly cookie
     res.cookie("token", token, {
       httpOnly: true, // This will hide the cookie from the Javascript when execute, good against XSS attacks, but it can still be accessed by the server.
-      secure: process.env.NODE_ENV === "production", // Only send the cookie in production mode (HTTPS), this make sure the cookie is only accessible by the sender and receiver even though people can see it but cannot see what's inside it.
+      secure: config.isProduction, // Only send the cookie in production mode (HTTPS), this make sure the cookie is only accessible by the sender and receiver even though people can see it but cannot see what's inside it.
       sameSite: "lax", // Anti-CSRF attack
       maxAge: 1000 * 60 * 60, // logs out automatically regardless of they are active or not after 1hour
     });

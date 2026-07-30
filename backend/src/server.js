@@ -8,11 +8,12 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
 import helmet from 'helmet';
 import errorMiddleware from './middleware/errorMiddleware.js';
+import { config } from './config/index.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = config.port || 5001;
 
 // 1. First of all, the helmet. Serves as a building and first line of defense to protect the app from 7 possible attacks such as XSS
 app.use(helmet());

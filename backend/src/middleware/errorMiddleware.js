@@ -1,4 +1,5 @@
 // backend/src/middleware/errorMiddleware.js 
+import { config } from '../config/index.js';
 import AppError from '../utils/AppError.js';
 const errorMiddleware = (err, req, res, next) => {
   // 1 Initialize default values to be overriden by error types later
@@ -61,8 +62,8 @@ const errorMiddleware = (err, req, res, next) => {
   console.error('PROGRAMMER ERROR', err);
   return res.status(500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' ? 'Something went wrong. Please try again later.' : err.message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+    message: config.nodeEnv === 'production' ? 'Something went wrong. Please try again later.' : err.message,
+    ...(config.nodeEnv !== 'production' && { stack: err.stack }),
   });
 };
 

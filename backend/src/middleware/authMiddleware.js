@@ -2,6 +2,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
+import { config } from '../config/index.js';
 
 export default async function authMiddleware(req, res, next) {
   try {
@@ -9,7 +10,7 @@ export default async function authMiddleware(req, res, next) {
     const token = req.cookies?.token;
 
     // 2. Verify token (protect)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwtSecret);
 
     // 3. attach user object to request
     const user = await User.findById(decoded.userId);

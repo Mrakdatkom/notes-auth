@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import { config } from "./index.js"
 
 export const connectDb = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(config.mongoUri, {
       sanitizeFilter: true, // This is the equivalent or alternative to the mongoSanitize() package. Since it is already a built-in function, we will just declare it here
     });
     console.log("Database connected to MongoDB");
